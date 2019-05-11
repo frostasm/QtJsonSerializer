@@ -313,6 +313,17 @@ QJsonValue QJsonSerializer::serializeValue(int propertyType, const QVariant &val
 		if(value.userType() == QMetaType::QJsonValue)//value needs special treatment
 			return value.toJsonValue();
 
+		// Note: QJsonValue::fromVariant convert qint8, quint8, qint16, quint16 to string representation => "\u0004"
+		switch (QMetaType::Type(value.type())) {
+		case QMetaType::SChar:
+		case QMetaType::UChar:
+		case QMetaType::Short:
+		case QMetaType::UShort:
+			return QJsonValue(value.toInt());
+		default:
+			break;
+		}
+
 		auto json = QJsonValue::fromVariant(value);
 		if(json.isNull()) { //special types where a null json is valid, and corresponds to a different
 			static const QHash<int, QJsonValue::Type> nullTypes = {
