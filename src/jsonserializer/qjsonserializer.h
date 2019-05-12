@@ -48,6 +48,12 @@ class Q_JSONSERIALIZER_EXPORT QJsonSerializer : public QObject, protected QJsonT
 	Q_PROPERTY(Polymorphing polymorphing READ polymorphing WRITE setPolymorphing NOTIFY polymorphingChanged)
 	//! Specify how multi maps and sets should be serialized
 	Q_PROPERTY(MultiMapMode multiMapMode READ multiMapMode WRITE setMultiMapMode NOTIFY multiMapModeChanged)
+	//! Specifies, whether class information items (Q_CLASSINFO) should be serialized as object property (default false)
+	Q_PROPERTY(bool serializeClassInfo READ serializeClassInfo WRITE setSerializeClassInfo NOTIFY serializeClassInfoChanged)
+	//! Specifies, which prefix will be added to the class info key name during serialization (default "_")
+	Q_PROPERTY(QString classInfoKeyPrefix READ classInfoKeyPrefix WRITE setClassInfoKeyPrefix NOTIFY classInfoKeyPrefixChanged)
+	//! Specifies, which suffix will be added to the class info key name during serialization (default "_")
+	Q_PROPERTY(QString classInfoKeySuffix READ classInfoKeySuffix WRITE setClassInfoKeySuffix NOTIFY classInfoKeySuffixChanged)
 
 public:
 	//! Flags to specify how strict the serializer should validate when deserializing
@@ -132,6 +138,12 @@ public:
 	Polymorphing polymorphing() const;
 	//! @readAcFn{QJsonSerializer::multiMapMode}
 	MultiMapMode multiMapMode() const;
+	//! @readAcFn{QJsonSerializer::serializeClassInfo}
+	bool serializeClassInfo() const;
+	//! @readAcFn{QJsonSerializer::classInfoKeyPrefix}
+	QString classInfoKeyPrefix() const;
+	//! @readAcFn{QJsonSerializer::classInfoKeySuffix}
+	QString classInfoKeySuffix() const;
 
 	//! Serializers a QVariant value to a QJsonValue
 	QJsonValue serialize(const QVariant &data) const;
@@ -202,6 +214,12 @@ public Q_SLOTS:
 	void setPolymorphing(Polymorphing polymorphing);
 	//! @writeAcFn{QJsonSerializer::multiMapMode}
 	void setMultiMapMode(MultiMapMode multiMapMode);
+	//! @writeAcFn{QJsonSerializer::serializeClassInfo}
+	void setSerializeClassInfo(bool serializeClassInfo);
+	//! @writeAcFn{QJsonSerializer::classInfoKeyPrefix}
+	void setClassInfoKeyPrefix(const QString &classInfoKeyPrefix);
+	//! @writeAcFn{QJsonSerializer::classInfoKeySuffix}
+	void setClassInfoKeySuffix(const QString &classInfoKeySuffix);
 
 Q_SIGNALS:
 	//! @notifyAcFn{QJsonSerializer::allowDefaultNull}
@@ -220,6 +238,12 @@ Q_SIGNALS:
 	void polymorphingChanged(Polymorphing polymorphing);
 	//! @notifyAcFn{QJsonSerializer::multiMapMode}
 	void multiMapModeChanged(MultiMapMode multiMapMode);
+	//! @notifyAcFn{QJsonSerializer::serializeClassInfo}
+	void serializeClassInfoChanged(bool serializeClassInfo);
+	//! @notifyAcFn{QJsonSerializer::classInfoKeyPrefix}
+	void classInfoKeyPrefixChanged(const QString &classInfoKeyPrefix);
+	//! @notifyAcFn{QJsonSerializer::classInfoKeySuffix}
+	void classInfoKeySuffixChanged(const QString &classInfoKeySuffix);
 
 protected:
 	//protected implementation -> internal use for the type converters

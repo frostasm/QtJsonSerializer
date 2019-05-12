@@ -71,6 +71,21 @@ QJsonSerializer::MultiMapMode QJsonSerializer::multiMapMode() const
 	return d->multiMapMode;
 }
 
+bool QJsonSerializer::serializeClassInfo() const
+{
+	return d->serializeClassInfo;
+}
+
+QString QJsonSerializer::classInfoKeyPrefix() const
+{
+	return d->classInfoKeyPrefix;
+}
+
+QString QJsonSerializer::classInfoKeySuffix() const
+{
+	return d->classInfoKeySuffix;
+}
+
 QJsonValue QJsonSerializer::serialize(const QVariant &data) const
 {
 	return serializeImpl(data);
@@ -227,6 +242,33 @@ void QJsonSerializer::setMultiMapMode(QJsonSerializer::MultiMapMode multiMapMode
 
 	d->multiMapMode = multiMapMode;
 	emit multiMapModeChanged(d->multiMapMode);
+}
+
+void QJsonSerializer::setSerializeClassInfo(bool serializeClassInfo)
+{
+	if(d->serializeClassInfo == serializeClassInfo)
+		return;
+
+	d->serializeClassInfo = serializeClassInfo;
+	emit serializeClassInfoChanged(serializeClassInfo);
+}
+
+void QJsonSerializer::setClassInfoKeyPrefix(const QString& classInfoKeyPrefix)
+{
+	if(d->classInfoKeyPrefix == classInfoKeyPrefix)
+		return;
+
+	d->classInfoKeyPrefix = classInfoKeyPrefix;
+	emit classInfoKeyPrefixChanged(classInfoKeyPrefix);
+}
+
+void QJsonSerializer::setClassInfoKeySuffix(const QString& classInfoKeySuffix)
+{
+	if(d->classInfoKeySuffix == classInfoKeySuffix)
+		return;
+
+	d->classInfoKeySuffix = classInfoKeySuffix;
+	emit classInfoKeySuffixChanged(classInfoKeySuffix);
 }
 
 QVariant QJsonSerializer::getProperty(const char *name) const
@@ -523,6 +565,12 @@ QByteArray QJsonSerializerPrivate::getTypeName(int propertyType)
 {
 	QReadLocker lock{&typedefLock};
 	return typedefMapping.value(propertyType, QMetaType::typeName(propertyType));
+}
+
+QJsonSerializerPrivate::QJsonSerializerPrivate() :
+	classInfoKeyPrefix{QStringLiteral("_")},
+	classInfoKeySuffix{QStringLiteral("_")}
+{
 }
 
 QSharedPointer<QJsonTypeConverter> QJsonSerializerPrivate::findConverter(int propertyType, QJsonValue::Type valueType)

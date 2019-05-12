@@ -43,7 +43,7 @@ QJsonValue QJsonObjectConverter::serialize(int propertyType, const QVariant &val
 		return QJsonValue();
 
 	//get the metaobject, based on polymorphism
-	const QMetaObject *meta = nullptr;
+	const QMetaObject *metaObject = nullptr;
 	auto poly = static_cast<QJsonSerializer::Polymorphing>(helper->getProperty("polymorphing").toInt());
 	auto isPoly = false;
 	switch (poly) {
@@ -64,21 +64,39 @@ QJsonValue QJsonObjectConverter::serialize(int propertyType, const QVariant &val
 	QJsonObject jsonObject;
 
 	if(isPoly) {
-		meta = object->metaObject();
+		metaObject = object->metaObject();
 		//first: pass the class name
-		jsonObject[QStringLiteral("@class")] = QString::fromUtf8(meta->className());
+		jsonObject[QStringLiteral("@class")] = QString::fromUtf8(metaObject->className());
 	} else
-		meta = getMetaObject(propertyType);
+		metaObject = getMetaObject(propertyType);
 
 	//go through all properties and try to serialize them
 	auto keepObjectName = helper->getProperty("keepObjectName").toBool();
 	auto i = QObject::staticMetaObject.indexOfProperty("objectName");
 	if(!keepObjectName)
 	   i++;
-	for(; i < meta->propertyCount(); i++) {
-		auto property = meta->property(i);
+	for(; i < metaObject->propertyCount(); i++) {
+		auto property = metaObject->property(i);
 		if(property.isStored())
 			jsonObject[QString::fromUtf8(property.name())] = helper->serializeSubtype(property, property.read(object));
+	}
+
+	const bool serializeClassInfo = helper->getProperty("serializeClassInfo").toBool();
+	const int classInfoCount = metaObject->classInfoCount();
+	if (serializeClassInfo && classInfoCount > 0) {
+		const QString prefix = helper->getProperty("classInfoKeyPrefix").toString();
+		const QString suffix = helper->getProperty("classInfoKeySuffix").toString();
+		for(int i = 0; i < classInfoCount; ++i) {
+			const QMetaClassInfo clInfo = metaObject->classInfo(i);
+			const QString key = prefix + QString::fromUtf8(clInfo.value()) + suffix;
+			if (jsonObject.contains(key)) {
+				const QString error = QStringLiteral("classInfo key \"%1\" override property of qobject class %2")
+						.arg(key).arg(QLatin1Literal(QMetaType::typeName(propertyType)));
+				throw QJsonSerializationException(error.toUtf8());
+			}
+
+			jsonObject[key] = QString::fromUtf8(clInfo.value());
+		}
 	}
 
 	return jsonObject;

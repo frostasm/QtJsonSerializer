@@ -15,7 +15,7 @@ class Q_JSONSERIALIZER_EXPORT QJsonSerializerPrivate
 public:
 	static QByteArray getTypeName(int propertyType);
 
-	QJsonSerializerPrivate() = default;
+	QJsonSerializerPrivate();
 
 	static QReadWriteLock typedefLock;
 	static QHash<int, QByteArray> typedefMapping;
@@ -31,6 +31,9 @@ public:
 	QJsonSerializer::ValidationFlags validationFlags = QJsonSerializer::StandardValidation;
 	QJsonSerializer::Polymorphing polymorphing = QJsonSerializer::Enabled;
 	QJsonSerializer::MultiMapMode multiMapMode = QJsonSerializer::MultiMapMode::Map; //TODO which one is the better default?
+	bool serializeClassInfo = false;
+	QString classInfoKeyPrefix;
+	QString classInfoKeySuffix;
 
 	QReadWriteLock typeConverterLock{};
 	QList<QSharedPointer<QJsonTypeConverter>> typeConverters;

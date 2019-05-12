@@ -55,6 +55,25 @@ QJsonValue QJsonGadgetConverter::serialize(int propertyType, const QVariant &val
 			jsonObject[QString::fromUtf8(property.name())] = helper->serializeSubtype(property, property.readOnGadget(gadget));
 	}
 
+	const bool serializeClassInfo = helper->getProperty("serializeClassInfo").toBool();
+	const int classInfoCount = metaObject->classInfoCount();
+	if (serializeClassInfo && classInfoCount > 0) {
+		const QString prefix = helper->getProperty("classInfoKeyPrefix").toString();
+		const QString suffix = helper->getProperty("classInfoKeySuffix").toString();
+		for(int i = 0; i < classInfoCount; ++i) {
+			const QMetaClassInfo clInfo = metaObject->classInfo(i);
+			const QString key = prefix + QString::fromUtf8(clInfo.name()) + suffix;
+			if (jsonObject.contains(key)) {
+				const QString error = QStringLiteral("classInfo key name \"%1\" override property of gadget class %2")
+						.arg(key).arg(QLatin1Literal(QMetaType::typeName(propertyType)));
+				throw QJsonSerializationException(error.toUtf8());
+			}
+
+			jsonObject[key] = QString::fromUtf8(clInfo.value());
+		}
+	}
+
+
 	return jsonObject;
 }
 
